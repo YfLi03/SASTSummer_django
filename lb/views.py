@@ -33,11 +33,14 @@ def leaderboard(req: HttpRequest):
 @method(["GET"])
 def history(req: HttpRequest, username: str):
     res = utils.get_history(username)
-    print(res)
     if res:
         return JsonResponse({
             "code": 0,
-            "data": [model_to_dict(r) for r in res],
+            "data": [{
+                "score": r.score,
+                "subs": r.subs.split(" "),
+                "time": r.time
+            } for r in res],
         })
     else:
         return JsonResponse({
