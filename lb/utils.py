@@ -1,5 +1,6 @@
 from lb.models import Submission, User
 from random import randint
+import math
 import functools
 
 def get_leaderboard():
@@ -55,6 +56,7 @@ def get_leaderboard():
             subs[s.user_id] = s
 
     subs = sorted(subs.values(), key=lambda x: (-x.score, x.time))
+    # The last submit is already selected, so we only need to order by score, then time.
     return [
         {
             "user": obj.user.username,
@@ -70,17 +72,55 @@ def get_leaderboard():
     # 方案3：调用 Django 的 API (俺不会了
     # ...
 
+
+def get_history(username):
+    user = User.objects.filter(username=username).first()
+    # is it OK?
+    submissions = Submission.objects.filter(user=user).order_by("time")
+    # is it the json format?
+    return submissions
+
+
+def interpolate(x1, x2, y1, y2, x):
+    if x < x1:
+        return y1
+    if x > x2:
+        return y2
+    return math.sqrt((x - x1) / (x2 - x1)) * (y2 - y1) + y1
+
+
 def judge(content: str):
     """
-    Convert submitted content to a main score and a list of sub scors
+    Convert submitted content to a main score and a list of sub scores
     :param content: the submitted content to be judged
     :return: main score, list[sub score]
     """
+    ground_truth = open("./ground_truth.txt", "r")
+    result = [0, 0, 0]
+    answers = content.split("\n")
+    next(ground_truth)
+    lines = ground_truth.readlines()
+    now_line = 0
+    print(len(answers))
+    try:
+        for line in lines:
+            print(now_line)
+            std_answer = [bool(t) for t in line.split(",")[1:]]
+            answer = [bool(int(t)) for t in answers[now_line].split(",")]
+            for i in range(0, 3):
+                if std_answer[i] == answer[i]:
+                    result[i] += 1
+            now_line += 1
+            print(now_line)
+        print("finished")
+    except Exception as e:
+        print("exception")
+        raise Exception
 
-    # TODO: Use `ground_truth.txt` and the content to calculate scores.
-    #  If `content` is invalid, raise an Exception so that it can be
-    #  captured in the view function.
-    #  You can define the calculation of main score arbitrarily.
-
-    subs = [randint(0, 100) for _ in range(3)]
-    return sum(subs), subs
+    mean_result = sum(result) / 3
+    return round(
+        55 * interpolate(.5, .8, 0, 1, mean_result) +
+        15 * interpolate(.5, .7, 0, 1, result[0]) +
+        15 * interpolate(.5, .9, 0, 1, result[1]) +
+        15 * interpolate(.5, .75, 0, 1, result[2])
+    ), result
