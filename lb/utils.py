@@ -104,17 +104,13 @@ def judge(content: str):
     print(len(answers))
     try:
         for line in lines:
-            print(now_line)
             std_answer = [bool(t) for t in line.split(",")[1:]]
             answer = [bool(int(t)) for t in answers[now_line].split(",")]
             for i in range(0, 3):
                 if std_answer[i] == answer[i]:
                     result[i] += 1
             now_line += 1
-            print(now_line)
-        print("finished")
     except Exception as e:
-        print("exception")
         raise Exception
 
     mean_result = sum(result) / 3

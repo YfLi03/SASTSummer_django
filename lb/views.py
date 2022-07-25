@@ -108,6 +108,7 @@ def vote(req: HttpRequest):
         })
     user = User.objects.get(username=body["user"])
     user.votes = user.votes + 1
+    user.save()
 
     return JsonResponse({
         "code": 0,
