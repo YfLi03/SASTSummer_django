@@ -7,6 +7,4 @@ urlpatterns = [
     path("submit", views.submit),
     path('history/<slug:username>', views.history),
     path('vote', views.vote),
-
-    # TODO: Config URL Patterns
 ]

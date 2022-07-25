@@ -74,7 +74,13 @@ def get_leaderboard():
 
 
 def get_history(username):
-    user = User.objects.filter(username=username).first()
+    """
+    Get the submissions of a user
+    :param username: the name of the user(str)
+    *it's unclear whether it works well with slugs
+    :return: list[Submissions(model)]
+    """
+    user = User.objects.get(username=username)
     # is it OK?
     submissions = Submission.objects.filter(user=user).order_by("time")
     # is it the json format?
