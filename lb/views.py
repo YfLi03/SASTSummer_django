@@ -49,6 +49,8 @@ def history(req: HttpRequest, username: str):
 @csrf_exempt
 def submit(req: HttpRequest):
     content = json.loads(req.body)
+    if "avatar" not in content:
+        content["avatar"] = "null"
     if not ("user" in content and "avatar" in content and "content" in content):
         return JsonResponse({
             "code": 1,
@@ -73,7 +75,7 @@ def submit(req: HttpRequest):
         if len(user) == 0:
             User.objects.create(username=content["user"])
         user = User.objects.get(username=content["user"])
-        subs = str(sub[0])+" "+str(sub[1])+" "+str(sub[2])
+        subs = str(sub[0]) + " " + str(sub[1]) + " " + str(sub[2])
         Submission.objects.create(user=user, avatar=content["avatar"], score=score, subs=subs)
         return JsonResponse({
             "code": 0,
@@ -88,8 +90,6 @@ def submit(req: HttpRequest):
             "code": -3,
             "msg": "提交内容非法呜呜"
         })
-
-
 
 
 @method(["POST"])
